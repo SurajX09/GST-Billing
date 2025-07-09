@@ -33,7 +33,6 @@ const InvoicePreview = ({ invoice }) => {
 
     const logo = new Image();
     logo.src = "/logo-png.webp";
-
     logo.onload = () => {
       const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pageWidth - margin * 2;
@@ -59,15 +58,15 @@ const InvoicePreview = ({ invoice }) => {
 
       pdf.addImage(imgData, "PNG", margin, yStart, pdfWidth, pdfHeight);
 
-      // ✅ Add watermark first (before invoice image)
+      // Watermark
       pdf.setTextColor(245, 245, 245);
       pdf.setFontSize(14);
-      pdf.setTextColor(80); // optional tweak
+      pdf.setTextColor(80);
       pdf.setFont("helvetica", "bold");
       pdf.text("Tax Invoice ", pageWidth / 2, pageHeight / 40, {
         align: "center",
         angle: 0,
-        opacity: 0.01, // will be ignored in some PDF readers, but helpful visually
+        opacity: 0.01,
       });
 
       const totalPages = pdf.internal.getNumberOfPages();
