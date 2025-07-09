@@ -29,59 +29,50 @@ const InvoicePreview = ({ invoice }) => {
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 40;
-    const yStart = 160;
+    const yStart = 80;
 
-    const logo = new Image();
-    logo.src = "/logo-png.webp";
-    logo.onload = () => {
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pageWidth - margin * 2;
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pageWidth - margin * 2;
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-      const maxLogoWidth = 90;
-      const logoAspectRatio = logo.width / logo.height;
-      const logoWidth = Math.min(maxLogoWidth, logo.width);
-      const logoHeight = logoWidth / logoAspectRatio;
+    pdf.setFontSize(12);
+    pdf.setTextColor(30);
+    pdf.text("Suraj Enterprises", margin, 45);
+    pdf.text("GSTIN: 27ABCDE1234Z5", margin, 60);
+    pdf.text("Email: billing@suraj.com", margin, 75);
 
-      pdf.addImage(logo, "PNG", margin, 30, logoWidth, logoHeight);
-      pdf.setFontSize(12);
-      pdf.setTextColor(30);
-      pdf.text("Suraj Enterprises", margin + logoWidth + 10, 45);
-      pdf.text("GSTIN: 27ABCDE1234Z5", margin + logoWidth + 10, 60);
-      pdf.text("Email: billing@suraj.com", margin + logoWidth + 10, 75);
+    pdf.setFontSize(11);
+    pdf.setTextColor(50);
+    pdf.text(`Customer: ${customerData.name}`, margin, yStart - 30);
+    pdf.text(`Email: ${customerData.email}`, margin, yStart - 15);
+    pdf.text(`Mobile: ${customerData.mobile}`, margin + 300, yStart - 15);
 
-      pdf.setFontSize(11);
-      pdf.setTextColor(50);
-      pdf.text(`Customer: ${customerData.name}`, margin, yStart - 30);
-      pdf.text(`Email: ${customerData.email}`, margin, yStart - 15);
-      pdf.text(`Mobile: ${customerData.mobile}`, margin + 300, yStart - 15);
+    pdf.addImage(imgData, "PNG", margin, yStart, pdfWidth, pdfHeight);
 
-      pdf.addImage(imgData, "PNG", margin, yStart, pdfWidth, pdfHeight);
+    // Watermark (optional)
+    pdf.setTextColor(245, 245, 245);
+    pdf.setFontSize(14);
+    pdf.setTextColor(80);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Tax Invoice", pageWidth / 2, pageHeight / 40, {
+      align: "center",
+      angle: 0,
+      opacity: 0.01,
+    });
 
-      // Watermark
-      pdf.setTextColor(245, 245, 245);
-      pdf.setFontSize(14);
-      pdf.setTextColor(80);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Tax Invoice ", pageWidth / 2, pageHeight / 40, {
-        align: "center",
-        angle: 0,
-        opacity: 0.01,
+    const totalPages = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(10);
+      pdf.setTextColor(100);
+      pdf.text(`Page ${i} of ${totalPages}`, pageWidth - margin, pageHeight - 20, {
+        align: "right",
       });
+    }
 
-      const totalPages = pdf.internal.getNumberOfPages();
-      for (let i = 1; i <= totalPages; i++) {
-        pdf.setPage(i);
-        pdf.setFontSize(10);
-        pdf.setTextColor(100);
-        pdf.text(`Page ${i} of ${totalPages}`, pageWidth - margin, pageHeight - 20, {
-          align: "right",
-        });
-      }
+    pdf.save("GST-Invoice.pdf");
 
-      pdf.save("GST-Invoice.pdf");
-    };
-
+    // Local storage code (optional)
     const stored = localStorage.getItem("savedInvoices") || "[]";
     const parsed = JSON.parse(stored);
     const updated = [...parsed, { ...invoice, customerData }];
@@ -149,7 +140,7 @@ const InvoicePreview = ({ invoice }) => {
       </button>
 
       <p className="text-xs text-gray-500 mb-4">
-        Tip: "Download PDF" saves the invoice with business logo & watermark.
+        Tip: "Download PDF" saves the invoice with watermark.
       </p>
 
       <div ref={componentRef} className="bg-white p-6 shadow rounded text-sm">
