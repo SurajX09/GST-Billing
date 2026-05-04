@@ -1,0 +1,5 @@
+﻿{
+  "company": {"name": "Suraj Enterprises", "gstin": "27ABCDE1234Z5", "address": "Mumbai"},
+  "customer": {"name": "Customer A", "gstin": "27AAAAA1111A1Z1", "address": "Pune"},
+  "items": [{"description": "Product 1", "hsn": "1001", "quantity": 2, "rate": 500, "taxRate": 18}]
+}

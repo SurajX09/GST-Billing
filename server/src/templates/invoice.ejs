@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Invoice</title>
+  <style>
+    @page { size: A4; margin: 8mm; }
+    html,body { width:210mm; height:297mm; margin:0; padding:0; font-family: 'Inter', Arial, Helvetica, sans-serif; font-size:12px; color:#222; }
+    .sheet { box-sizing: border-box; padding: 12mm; width: 186mm; position:relative; }
+
+    /* Banner that slightly overlaps the content for a professional look */
+    .banner { position:relative; height:72px; background: linear-gradient(90deg,#0ea5e9,#7c3aed); color:#fff; border-radius:8px; padding:12px 16px; box-shadow:0 6px 18px rgba(0,0,0,0.08); margin-bottom:-28px; z-index:2; }
+    .banner h1 { margin:0; font-size:20px; letter-spacing:0.3px; }
+    .banner .sub { font-size:11px; opacity:0.95; }
+
+    /* Watermark behind content */
+    .sheet:before { content: ""; position:absolute; inset:0; background: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" height=\"600\"><text x=\"50%\" y=\"50%\" dominant-baseline=\"middle\" text-anchor=\"middle\" fill=\"%23cccccc\" font-size=48 opacity=0.06 transform=\"rotate(-30 300 300)\">INVOICE</text></svg>') no-repeat center; background-size:420px; pointer-events:none; z-index:0; }
+
+    header { display:block; margin-top:18px; margin-bottom:6mm; position:relative; z-index:3; }
+    h1 { font-size:18px; margin:0; }
+    .meta { margin-top:6mm; display:flex; justify-content:space-between; }
+    .meta div { width:48%; }
+    table { width:100%; border-collapse: collapse; font-size:12px; background:#fff; position:relative; z-index:3; }
+    th, td { border-bottom:1px solid #e6e6e6; padding:8px 10px; text-align:left; vertical-align:top; }
+    th { background:transparent; font-weight:700; color:#334155; text-transform:uppercase; font-size:11px; }
+    .right { text-align:right; }
+    .no-break { page-break-inside: avoid; }
+    .summary { margin-top:6mm; width:100%; }
+    .small { font-size:11px; color:#334155; }
+    /* ensure rows break cleanly */
+    tr { page-break-inside: avoid; }
+    /* subtle separators instead of heavy borders */
+    tbody tr:nth-child(odd) td { background: #fbfbfb }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="banner">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h1><%= company.name %></h1>
+          <div class="sub"><strong>GSTIN:</strong> <%= company.gstin || '-' %></div>
+        </div>
+        <div style="text-align:right; font-size:12px;">
+          <div class="sub"><strong>Date:</strong> <%= invoice.dateString %></div>
+          <div class="sub"><strong>Invoice:</strong> <%= invoice.invoiceNumber %></div>
+        </div>
+      </div>
+    </div>
+
+    <header>
+      <div class="small"><%= company.address || '' %></div>
+    </header>
+
+    <section class="meta">
+      <div>
+        <div><strong>Invoice No:</strong> <%= invoice.invoiceNumber %></div>
+        <div><strong>Date:</strong> <%= invoice.dateString %></div>
+        <div><strong>Customer:</strong> <%= invoice.customer.name %></div>
+        <div><strong>Customer GSTIN:</strong> <%= invoice.customer.gstin || '-' %></div>
+      </div>
+      <div>
+        <div><strong>Place of Supply:</strong> <%= invoice.customer.address || '-' %></div>
+      </div>
+    </section>
+
+    <table class="no-break" style="margin-top:8mm;">
+      <thead>
+        <tr>
+          <th style="width:6%">#</th>
+          <th style="width:40%">Description</th>
+          <th style="width:10%">HSN</th>
+          <th style="width:10%" class="right">Qty</th>
+          <th style="width:12%" class="right">Rate</th>
+          <th style="width:12%" class="right">Taxable Value</th>
+          <th style="width:10%" class="right">Tax</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% invoice.items.forEach(function(item, i){ %>
+          <tr>
+            <td><%= i+1 %></td>
+            <td><%= item.description %></td>
+            <td><%= item.hsn || '-' %></td>
+            <td class="right"><%= item.quantity %></td>
+            <td class="right"><%= item.rate.toFixed(2) %></td>
+            <td class="right"><%= item.taxableValue.toFixed(2) %></td>
+            <td class="right"><%= ( (item.cgst||0) + (item.sgst||0) + (item.igst||0) ).toFixed(2) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <table class="summary small" style="margin-top:6mm; width:50%; float:right;">
+      <tbody>
+        <tr>
+          <td>Subtotal</td>
+          <td class="right"><%= invoice.subtotal.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <td>CGST</td>
+          <td class="right"><%= invoice.taxBreakdown.cgst.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <td>SGST</td>
+          <td class="right"><%= invoice.taxBreakdown.sgst.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <td>IGST</td>
+          <td class="right"><%= invoice.taxBreakdown.igst.toFixed(2) %></td>
+        </tr>
+        <tr>
+          <th>Total</th>
+          <th class="right"><%= invoice.totalAmount.toFixed(2) %></th>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="clear:both; margin-top:16mm;" class="small">Amount (in words): <%= invoice.totalAmountWords || '' %></div>
+  </div>
+</body>
+</html>
